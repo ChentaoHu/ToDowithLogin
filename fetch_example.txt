@@ -1,0 +1,26 @@
+var shippingLabel = new Headers();
+shippingLabel.append("Content-Type", "application/json");
+
+var userName = "your name here";
+var password = "12345";
+
+onSubmit(() =>
+    var payload = JSON.stringify({
+    "name": userName,
+    "password": password
+    });
+
+    var requestPackage = {
+    method: 'POST',
+    headers: shippingLabel,
+    body: payload,
+    redirect: 'follow'
+    };
+
+    fetch("http://localhost:3001/users/register", requestPackage)
+    .then(response => response.text())
+    .then(result => console.log(result))
+    .catch(error => console.log('error', error));
+);
+frontend: localhost:3000/
+backend: localhost:3001/users/login, etc
