@@ -1,4 +1,4 @@
-import React, {useRef} from 'react'
+import React, { useRef } from 'react'
 
 export default function Login(props) {
   const account = useRef();
@@ -12,30 +12,35 @@ export default function Login(props) {
 
     var shippingLabel = new Headers();
     shippingLabel.append("Content-Type", "application/json");
-  
+
     var payload = JSON.stringify({
       "name": name,
       "password": pass
     })
-  
+
     var requestPackage = {
       method: 'POST',
       headers: shippingLabel,
-      body: payload,
-      redirect: 'follow'
+      body: payload
     };
 
     // props.setLoginStatus(true)
     fetch("http://localhost:3001/login", requestPackage)
-    .then(res => {
-      if (res.status == 200) {
-        alert("logged in!")
-        props.setLoginStatus(true)
-      }
-    })
-    .catch(except => {
-      alert("login failed")
-    })
+      .then(res => {
+        return res.json()
+    })  
+      .then(data => {
+        if ("id" in data) {
+          const uid = data.id 
+          console.log("result: " +uid)
+          props.userLogIn(uid)
+          props.setLoginStatus(true)
+          console.log("props"+ props.userid)
+        }
+      })
+      .catch(except => {
+        alert("login failed")
+      })
   }
 
   return (

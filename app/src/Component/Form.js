@@ -7,18 +7,18 @@ const Form = (props) => {
   const userInput = useRef();
 
 
-  useEffect(() => {
-    const storedTodos = JSON.parse(localStorage.getItem(STORAGE_KEY))
-    if (storedTodos) props.setTodos(storedTodos)
-  }, [])
+  // useEffect(() => {
+  //   const storedTodos = JSON.parse(localStorage.getItem(STORAGE_KEY))
+  //   if (storedTodos) props.setTodos(storedTodos)
+  // }, [])
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(props.todos))
   }, [props.todos])
 
-  useEffect(() => {
-    props.filterHandler()
-  }, [props.todos, props.status])
+  // useEffect(() => {
+  //   props.filterHandler()
+  // }, [props.todos, props.status])
 
 
   function handleAddtodo(e) {
@@ -32,11 +32,10 @@ const Form = (props) => {
     myHeaders.append("Content-Type", "application/json");
 
     var raw = JSON.stringify({
-      "todo": {
-        "todo": toDoText,
-        "id": uuid(),
-        "complete": false
-      }
+      "body": toDoText,
+      "todo_id": uuid(),
+      "is_completed": false
+
     });
 
     var requestOptions = {
@@ -46,9 +45,13 @@ const Form = (props) => {
       redirect: 'follow'
     };
 
-    fetch("http://localhost:3001/todos/:userid", requestOptions)
-      .then(response => response.text())
-      .then(result => console.log(result))
+    fetch("http://localhost:3001/todos/" + props.userid, requestOptions)
+      .then(res => {
+        return res.json()
+      })
+      .then(data => {
+        props.updateTodos(data)
+      })
       .catch(error => console.log('error', error));
 
     userInput.current.value = null
@@ -56,12 +59,42 @@ const Form = (props) => {
 
   function deleteTodo(e) {
     e.preventDefault()
-    const newTodo = props.todos.filter(todo => !todo.complete)
-    props.setTodos(newTodo)
+    var requestOptions = {
+      method: 'POST',
+      redirect: 'follow'
+    };
+
+    fetch("http://localhost:3001/todos/" + props.userid +"/uncompleted", requestOptions)
+      .then(res => {
+        return res.json()
+      })
+      .then(data => {
+        console.log(data)
+        props.setTodos(data)
+      })
+      .catch(error => console.log('error', error));
   }
+
+
 
   function statusChange(e) {
     props.setStatus(e.target.value)
+    const filterstatus = e.target.value
+
+    var requestOptions = {
+      method: 'GET',
+      redirect: 'follow'  
+    };
+
+    fetch("http://localhost:3001/todos/" + props.userid +"/"+ filterstatus, requestOptions)
+    .then(res => {
+      return res.json()
+    })
+    .then(data => {
+        console.log(data)
+        props.setTodos(data)
+      })
+      .catch(error => console.log('error', error));
   }
 
 
@@ -72,18 +105,17 @@ const Form = (props) => {
       <button onClick={handleAddtodo} className="todo-button" type="submit">
         Add Todos
       </button>
-      <button className="clear-button" onClick={deleteTodo}>
+      <button onClick={deleteTodo}>
         Delete Selected Todos
       </button>
       <div>
-        <select onChange={statusChange} name="todos"
-          className="filter">
-          <option value="All">All</option>
+        <select onChange={statusChange} id ="filter">
+          <option value="all">All</option>
           <option value="completed">Completed</option>
           <option value="uncompleted">Uncompleted</option>
         </select>
       </div>
-      <h3>There are still {props.todos.filter(todo => !todo.complete).length} things left to do!</h3>
+      <h3>There are still {props.todos?.filter(todo => !todo.is_completed).length} things left to do!</h3>
     </form>
   )
 }

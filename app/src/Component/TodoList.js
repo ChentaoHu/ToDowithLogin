@@ -2,30 +2,18 @@ import React from 'react';
 import Todo from './Todo'
 
 
-function TodoList ({toggleTodo, deleteSingleTodo, filter}){
-
-  useEffect(() => {
-    var requestOptions = {
-      method: 'GET',
-      redirect: 'follow'
-    };
+function TodoList(props) {
+  
+  if (props.todos != null) {
     
-    fetch("http://localhost:3001/todos/:id", requestOptions)
-      .then(response => {
-        if (response.status == 200){
-
-        }
-
+    return (
+      props.todos?.map(todo => {
+        console.log(todo)
+        return <Todo key ={todo.todo_id} todo={todo} filter={props.filter} setTodos={props.setTodos} userid={props.userid} updateTodos={props.updateTodos}/>
       })
-      .then(result => console.log(result))
-      .catch(error => console.log('error', error));
-  },[])
-
-  return (
-        filter.map(todo => {
-          return <Todo todo ={todo} toggleTodo ={toggleTodo}  deleteSingleTodo={deleteSingleTodo} filter={filter}/>
-        })
-  )
+    )
+  }
+  else return null
 }
 
 export default TodoList
